@@ -25,7 +25,7 @@
       border
     >
       <el-table-column align="center" prop="vname" label="班级名"></el-table-column>
-      <el-table-column align="center" prop="createTime" label="上课时间"></el-table-column>
+<!--      <el-table-column align="center" prop="createTime" label="上课时间"></el-table-column>-->
       <el-table-column align="center" prop="cname" label="课程名"></el-table-column>
       <el-table-column align="center" label="课堂视频">
         <template slot-scope="scope">

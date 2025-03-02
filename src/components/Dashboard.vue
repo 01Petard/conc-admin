@@ -1,194 +1,186 @@
 <template>
-  <div>
-    <h1>综合图表展示</h1>
-
-    <!-- 图表容器：2x2布局 -->
-    <div class="charts-container">
-      <!-- 折线图 -->
-      <div ref="lineChart" class="chart-item"></div>
-
-      <!-- 柱状图 -->
-      <div ref="barChart" class="chart-item"></div>
-
-      <!-- 饼图 -->
-      <div ref="pieChart" class="chart-item"></div>
-
-      <!-- 散点图 -->
+  <div class="dashboard">
+    <!-- 左侧：图表区域，占40%宽度 -->
+    <div class="left-panel">
+      <div ref="HeadUpRateChart" class="chart-item"></div>
+      <div ref="HeadFrontRateChart" class="chart-item"></div>
+      <div ref="ConCChart" class="chart-item"></div>
       <div ref="scatterChart" class="chart-item"></div>
     </div>
 
-    <StudentList/>
+    <!-- 右侧：视频和控制台区域，占60%宽度 -->
+    <div class="right-panel">
+      <!-- 上方：视频播放区域，占80%高度 -->
+      <div class="video-container">
+        <el-card class="video-card">
+          <video ref="videoPlayer" :src="videoSrc" controls class="video-player"></video>
+        </el-card>
+      </div>
+
+      <!-- 下方：控制台区域，占20%高度 -->
+      <div class="control-panel">
+        <el-row gutter={20} type="flex" justify="center" align="middle">
+          <el-col :span="4">
+            <el-button type="primary" @click="playVideo" block>播放</el-button>
+          </el-col>
+          <el-col :span="4">
+            <el-button type="danger" @click="pauseVideo" block>暂停</el-button>
+          </el-col>
+          <el-col :span="6" style="margin-right: 20px">
+            <el-select v-model="selectedOption" placeholder="选择学生" class="control-item" block>
+              <el-option label="模式1" value="mode1"></el-option>
+              <el-option label="模式2" value="mode2"></el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="6" style="margin-right: 20px">
+            <el-input v-model="inputValue" placeholder="输入学生姓名" class="control-item" block></el-input>
+          </el-col>
+          <el-col :span="4">
+            <el-button type="success" @click="submitInput" block>查找</el-button>
+          </el-col>
+        </el-row>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
 import * as echarts from 'echarts';
-import StudentList from "./StudentList.vue";
-
 export default {
-  name: 'Dashboard',
-  components: {StudentList},
-  data() {
+  data: function () {
     return {
-      tableData: [],  // 学生数据
-      search: "",     // 搜索字段
+      videoSrc: '/Users/hzx/Desktop/demo.mp4',
+      selectedOption: '',
+      inputValue: ''
     };
-  },
-  computed: {
-    filteredData() {
-      return this.tableData.filter(
-        (data) =>
-          !this.search ||
-          data.sname.toLowerCase().includes(this.search.toLowerCase()) ||
-          data.sno.toString().includes(this.search)
-      );
-    },
   },
   mounted() {
     this.initCharts();
-    this.fetchStudents();
   },
   methods: {
+    playVideo() {
+      this.$refs.videoPlayer.play();
+    },
+    pauseVideo() {
+      this.$refs.videoPlayer.pause();
+    },
+    submitInput() {
+      this.$message.success(`提交内容: ${this.inputValue}`);
+    },
     initCharts() {
-      this.initLineChart();
-      this.initBarChart();
-      this.initPieChart();
+      this.initHeadUpRateChart();
+      this.initHeadFrontRateChart();
+      this.initConCChart();
       this.initScatterChart();
     },
-    // 折线图
-    initLineChart() {
-      const chartDom = this.$refs.lineChart;
-      const myChart = echarts.init(chartDom);
-      const option = {
-        title: {text: '折线图示例'},
+    initHeadUpRateChart() {
+      const myChart = echarts.init(this.$refs.HeadUpRateChart);
+      myChart.setOption({
+        title: {text: '抬头率', left: 'center'},
         tooltip: {trigger: 'axis'},
-        xAxis: {
-          type: 'category',
-          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-        },
+        grid: {left: '2%', right: '2%', top: '15%', bottom: '2%', containLabel: true},
+        xAxis: {type: 'category', data: ['周一', '周二', '周三', '周四', '周五']},
         yAxis: {type: 'value'},
-        series: [{
-          data: [820, 932, 901, 934, 1290, 1330, 1320],
-          type: 'line'
-        }]
-      };
-      myChart.setOption(option);
+        series: [{data: [820, 932, 901, 934, 1290], type: 'line', lineStyle: {color: '#1ad357', width: 4}, itemStyle: {color: '#1db162'}}]
+      });
     },
-    // 柱状图
-    initBarChart() {
-      const chartDom = this.$refs.barChart;
-      const myChart = echarts.init(chartDom);
-      const option = {
-        title: {text: '产品销售量'},
+    initHeadFrontRateChart() {
+      const myChart = echarts.init(this.$refs.HeadFrontRateChart);
+      myChart.setOption({
+        title: {text: '正头率', left: 'center'},
         tooltip: {trigger: 'axis'},
-        xAxis: {
-          type: 'category',
-          data: ['产品A', '产品B', '产品C', '产品D', '产品E']
-        },
+        grid: {left: '2%', right: '2%', top: '15%', bottom: '2%', containLabel: true},
+        xAxis: {type: 'category', data: ['周一', '周二', '周三', '周四', '周五']},
         yAxis: {type: 'value'},
-        series: [{
-          name: '销售量',
-          type: 'bar',
-          data: [30, 50, 70, 90, 110]
-        }]
-      };
-      myChart.setOption(option);
+        series: [{data: [820, 932, 901, 934, 1290], type: 'line', lineStyle: {color: '#ff5733', width: 4}, itemStyle: {color: '#c84728'}}]
+      });
     },
-    // 饼图
-    initPieChart() {
-      const chartDom = this.$refs.pieChart;
-      const myChart = echarts.init(chartDom);
-      const option = {
-        title: {text: '市场份额分布', left: 'center'},
-        tooltip: {trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)'},
-        series: [{
-          name: '市场份额',
-          type: 'pie',
-          radius: '55%',
-          center: ['50%', '50%'],
-          data: [
-            {value: 235, name: '品牌A'},
-            {value: 274, name: '品牌B'},
-            {value: 310, name: '品牌C'},
-            {value: 174, name: '品牌D'},
-            {value: 235, name: '品牌E'}
-          ],
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)'
-            }
-          }
-        }]
-      };
-      myChart.setOption(option);
+    initConCChart() {
+      const myChart = echarts.init(this.$refs.ConCChart);
+      myChart.setOption({
+        title: {text: '专注度', left: 'center'},
+        tooltip: {trigger: 'axis'},
+        grid: {left: '2%', right: '2%', top: '15%', bottom: '2%', containLabel: true},
+        xAxis: {type: 'category', data: ['周一', '周二', '周三', '周四', '周五']},
+        yAxis: {type: 'value'},
+        series: [{data: [820, 932, 901, 934, 1290], type: 'line', lineStyle: {color: '#b860ea', width: 4}, itemStyle: {color: '#842adf'}}]
+      });
     },
-    // 中心散点图
     initScatterChart() {
-      const chartDom = this.$refs.scatterChart;
-      const myChart = echarts.init(chartDom);
-      const option = {
-        title: {text: '散点图示例', left: 'center'},
-        tooltip: {trigger: 'item'},
-        xAxis: {
-          type: 'value',
-          name: 'X轴',
-          min: -1,
-          max: 1,
-          axisLine: {
-            show: true,
-            lineStyle: {color: '#333'}
-          },
-          axisLabel: {
-            formatter: value => value.toFixed(2), // 显示为两位小数
-          },
-        },
-        yAxis: {
-          type: 'value',
-          name: 'Y轴',
-          min: -1,
-          max: 1,
-          axisLine: {
-            show: true,
-            lineStyle: {color: '#333'}
-          },
-          axisLabel: {
-            formatter: value => value.toFixed(2), // 显示为两位小数
-          },
-        },
-        series: [{
-          symbolSize: 10,
-          data: [
-            [0.1, 0.2], [-0.3, 0.4], [0.5, -0.6], [-0.7, 0.8], [0.9, -0.9],
-            [-0.2, -0.3], [0.4, 0.5], [-0.6, -0.4], [0.7, 0.2], [-0.8, -0.1]
-          ],
-          type: 'scatter',
-          itemStyle: {
-            color: '#ff6347', // 设置点的颜色
-          },
-        }]
-      };
-      myChart.setOption(option);
-    },
+      const myChart = echarts.init(this.$refs.scatterChart);
+      myChart.setOption({
+        title: {text: '专注朝向', left: 'center'},
+        tooltip: {trigger: 'axis'},
+        grid: {left: '2%', right: '2%', top: '15%', bottom: '2%', containLabel: true},
+        xAxis: {type: 'value', min: -1, max: 1},
+        yAxis: {type: 'value', min: -1, max: 1},
+        series: [{data: [[0.1, 0.2], [-0.3, 0.4]], type: 'scatter', symbolSize: 12, itemStyle: {color: '#25b69c'}}]
+      });
+    }
   }
 };
 </script>
 
 <style scoped>
-/* 图表容器：2x2布局 */
-.charts-container {
+.dashboard {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center; /* 将图表容器中的图表居中 */
-  max-width: 900px; /* 限制最大宽度 */
+  height: 100vh;
 }
 
-/* 单个图表的样式 */
-.chart-item {
-  flex: 0 0 calc(50% - 10px);
-  height: 400px;
+/* 左侧：图表区域 */
+.left-panel {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-right: 20px;
 }
+
+.chart-item {
+  height: 40%;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+}
+
+/* 右侧：视频 + 控制台区域 */
+.right-panel {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 视频区域 */
+.video-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1px;
+}
+
+.video-card {
+  width: 90%;
+  background: #333;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.video-player {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+/* 控制台区域 */
+.control-panel {
+  height: 20%;
+  padding: 10px;
+  display: flex;              /* 使用 flex 布局 */
+  justify-content: center;    /* 水平居中 */
+  align-items: center;        /* 垂直居中 */
+  gap: 20px;                  /* 子元素之间的间隔 */
+}
+.control-item {
+  width: 100%;
+}
+
 </style>

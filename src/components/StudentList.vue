@@ -41,23 +41,23 @@
       <el-table-column align="center" prop="sphone" label="手机"></el-table-column>
 
       <el-table-column>
-
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            @click="handleEdit(scope.$index, scope.row)"
-            class="edit-btn"
-          >编辑
-          </el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            @click="handleDelete(scope.$index, scope.row)"
-            class="delete-btn"
-          >删除
-          </el-button>
+          <div class="button-container">
+            <el-button
+              size="mini"
+              @click="handleEdit(scope.$index, scope.row)"
+              class="edit-btn"
+            >编辑</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              @click="handleDelete(scope.$index, scope.row)"
+              class="delete-btn"
+            >删除</el-button>
+          </div>
         </template>
       </el-table-column>
+
     </el-table>
   </div>
 </template>
@@ -127,7 +127,7 @@ export default {
       try {
         // 调用后端接口获取学生列表
         const response = await axios.get('http://localhost:18080/student/list');
-
+        console.log(response.data);
         if (response.data.code === 10000) {
           // 更新表格数据
           this.tableData = response.data.data.map(student => ({
@@ -220,12 +220,13 @@ html, body {
   padding: 10px;
 }
 
-.el-table-column {
-  min-width: 100px;
+.button-container {
+  display: flex;
+  justify-content: center; /* 居中按钮 */
+  align-items: center; /* 垂直居中按钮 */
 }
 
-.el-button {
-  font-size: 14px;
+.button-container .el-button {
+  margin: 0 5px; /* 给按钮之间添加一些间距 */
 }
-
 </style>

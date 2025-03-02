@@ -1,17 +1,69 @@
 <template>
-  <StudentList/>
+  <div class="table-container">
+    <!-- 搜索框和查询按钮 -->
+    <div class="search-wrapper">
+      <el-input
+        v-model="search"
+        size="medium"
+        placeholder="请输入班级或课程名称"
+        clearable
+        class="search-input"
+      />
+      <el-button type="primary" size="medium" @click="handleSearch">查询</el-button>
+    </div>
+
+    <!-- 数据表格 -->
+    <el-table
+      ref="mytable"
+      :data="filteredData"
+      empty-text="暂无数据"
+      :row-class-name="showCss"
+      highlight-current-row
+      :show-header="true"
+      :fit="true"
+      size="medium"
+      border
+    >
+      <el-table-column align="center" prop="vname" label="班级名"></el-table-column>
+      <el-table-column align="center" prop="createTime" label="上课时间"></el-table-column>
+      <el-table-column align="center" prop="cname" label="课程名"></el-table-column>
+      <el-table-column align="center" label="课堂视频">
+        <template slot-scope="scope">
+          <img v-if="scope.row.vimg" :src="scope.row.vimg" alt="人脸图片" style="width: 50px; height: 50px; object-fit: cover;" />
+          <span v-else>无图片</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column>
+        <template slot-scope="scope">
+          <div class="button-container">
+            <el-button
+              size="mini"
+              @click="handleEdit(scope.$index, scope.row)"
+              class="edit-btn"
+            >编辑</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              @click="handleDelete(scope.$index, scope.row)"
+              class="delete-btn"
+            >删除</el-button>
+          </div>
+        </template>
+      </el-table-column>
+
+    </el-table>
+  </div>
 </template>
 
 <script>
 import axios from 'axios';
-import StudentList from "./StudentList.vue";
 
 export default {
   name: "VideoList",
-  components: {StudentList},
   data() {
     return {
-      tableData: [],  // 学生数据
+      tableData: [],  // 视频数据
       search: "",     // 搜索字段
     };
   },
@@ -64,40 +116,67 @@ export default {
       }
       return ""; // 如果没有图片路径，则返回空字符串
     },
-    // 获取学生数据 (异步函数)
-    async fetchStudents() {
+    // 获取视频数据 (异步函数)
+    async fetchVideos() {
       try {
-        // 调用后端接口获取学生列表
-        const response = await axios.get('http://localhost:18080/student/list');
-
+        // 调用后端接口获取视频列表
+        const response = await axios.get('http://localhost:18080/video/list');
+        console.log(response.data);
         if (response.data.code === 10000) {
           // 更新表格数据
-          this.tableData = response.data.data.map(student => ({
-            sno: student.sno,
-            sname: student.sname,
-            ssex: student.ssex,
-            sdept: student.sdept,
-            clazzId: student.clazzId,
-            clazzName: student.clazzName,
-            sidnum: student.sidnum,
-            sphone: student.sphone,
-            faceimg: student.faceimg,
+          this.tableData = response.data.data.map(video => ({
+            vid: video.vid,
+            vname: video.vname,
+            vimg: video.vimg,
+            cname: video.cname,
+            createTime: new Date(video.createTime).toLocaleString(),
           }));
         } else {
-          console.error("获取学生数据失败:", response.data.msg);
+          console.error("获取视频数据失败:", response.data.msg);
         }
       } catch (error) {
-        console.error("获取学生数据失败", error);
+        console.error("获取视频数据失败", error);
       }
     },
   },
   mounted() {
-    this.fetchStudents();
+    this.fetchVideos();
   },
 };
 </script>
 
 <style scoped>
+
+/* 让 table-container 适应内容高度 */
+.table-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* 确保表格外层的 div 占满高度 */
+div {
+  overflow: hidden;
+}
+
+/* 让页面高度自适应 */
+html, body {
+  height: auto;
+  overflow-x: hidden; /* 禁止横向滚动 */
+}
+
+/* 让搜索框和表格占据全部可用空间 */
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.el-table {
+  width: 100%;
+}
+
 /* 搜索框样式 */
 .search-wrapper {
   display: flex;
@@ -130,13 +209,13 @@ export default {
   font-size: 14px;
   padding: 10px;
 }
-
-.el-table-column {
-  min-width: 100px;
+.button-container {
+  display: flex;
+  justify-content: center; /* 居中按钮 */
+  align-items: center; /* 垂直居中按钮 */
 }
 
-.el-button {
-  font-size: 14px;
+.button-container .el-button {
+  margin: 0 5px; /* 给按钮之间添加一些间距 */
 }
-
 </style>

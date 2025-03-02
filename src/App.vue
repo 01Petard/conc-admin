@@ -3,14 +3,21 @@
     <!-- 头部导航栏 -->
     <el-header class="header">
       <div class="header-left">
-        <i class="el-icon-monitor"></i>
+        <i class="el-icon-monitor" style="font-size: 24px;"></i>
+<!--        <i class="el-icon-user"></i>-->
+<!--        <i class="el-icon-setting"></i>-->
+<!--        <i class="el-icon-bell"></i>-->
+<!--        <i class="el-icon-search"></i>-->
+<!--        <i class="el-icon-edit"></i>-->
+<!--        <i class="el-icon-delete"></i>-->
+<!--        <i class="el-icon-warning"></i>-->
         <span class="system-name">学生课堂专注度管理系统</span>
       </div>
       <div class="header-right">
         <span class="current-time">{{ currentTime }}</span>
         <el-dropdown>
           <span class="user-info">
-            <i class="el-icon-user"></i> {{ username }}
+            <i class="el-icon-user"  style="font-size: 20px;"></i> {{ username }}
           </span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item>个人中心</el-dropdown-item>
@@ -149,6 +156,7 @@ export default {
   flex: 0 0 200px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* 主内容区 */

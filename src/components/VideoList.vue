@@ -34,6 +34,14 @@
         </template>
       </el-table-column>
 
+      <el-table-column align="center" prop="status" label="处理状态">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">
+            {{ scope.row.status === 1 ? '已处理' : '未处理' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+
       <el-table-column>
         <template slot-scope="scope">
           <div class="button-container">
@@ -41,7 +49,7 @@
               size="mini"
               @click="handleEdit(scope.$index, scope.row)"
               class="edit-btn"
-            >编辑</el-button>
+            >处理</el-button>
             <el-button
               size="mini"
               type="danger"
@@ -129,6 +137,7 @@ export default {
             vname: video.vname,
             vimg: video.vimg,
             cname: video.cname,
+            status: video.status,
             createTime: new Date(video.createTime).toLocaleString(),
           }));
         } else {

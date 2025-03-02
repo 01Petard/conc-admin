@@ -73,7 +73,7 @@
     <!-- 页脚 -->
     <el-footer class="footer">
       <p>© 2025 学生课堂专注度管理系统 | 由 黄泽校 开发</p>
-      <p>备案号：京ICP备20250001号</p>
+<!--      <p>备案号：京ICP备20250001号</p>-->
     </el-footer>
   </div>
 </template>
@@ -113,9 +113,10 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #81C784;
+  background: #f2f6fa;
   color: black;
   padding: 10px 20px;
+  border-bottom: 1px solid #ddd;
 }
 
 .header-left {
@@ -152,7 +153,7 @@ export default {
 /* 侧边栏 */
 .aside {
   background: #f4f7fb;
-  border-right: 2px solid #ddd;
+  border-right: 1px solid #ddd;
   flex: 0 0 200px;
   display: flex;
   flex-direction: column;
@@ -169,9 +170,11 @@ export default {
 /* 页脚 */
 .footer {
   text-align: center;
-  background: #81C784;
-  color: white;
-  padding: 10px;
+  background: #f2f6fa;
+  color: black;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-top: 1px solid #ddd;
   font-size: 14px;
 }
 </style>

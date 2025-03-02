@@ -9,8 +9,24 @@
         clearable
         class="search-input"
       />
-      <el-button type="primary" size="medium" @click="handleSearch">查询</el-button>
+
+      <el-button type="primary" size="medium" @click="handleSearch">查询学生信息</el-button>
+
+      <!-- 日期范围选择组件 -->
+      <el-date-picker
+        v-model="dateRange"
+        type="daterange"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        value-format="yyyy-MM-dd"
+        class="date-picker"
+        style="margin: 0 10px 0 50px;height: 36px"
+      />
+
+      <el-button type="primary" size="medium" @click="handleExport">导出学生考勤数据</el-button>
     </div>
+
 
     <!-- 数据表格 -->
     <el-table
@@ -71,6 +87,7 @@ export default {
     return {
       tableData: [],  // 学生数据
       search: "",     // 搜索字段
+      dateRange: [], // 存储日期范围 [开始日期, 结束日期]
     };
   },
   computed: {
@@ -98,7 +115,7 @@ export default {
     },
     // 搜索功能
     handleSearch() {
-      console.log("搜索内容：", this.search);
+      console.log('查询条件：', this.search, '日期范围：', this.dateRange[0], this.dateRange[1]);
       this.fetchStudents();  // 搜索后重新获取数据
     },
     // 编辑操作
@@ -114,15 +131,10 @@ export default {
         this.fetchStudents();  // 删除后刷新列表
       });
     },
-    // 获取本地图片路径
-    getLocalImagePath(facePath) {
-      if (facePath) {
-        // 将本地路径转换为 file 协议路径
-        return `file:///${facePath.replace(/\\/g, '/')}`;
-      }
-      return ""; // 如果没有图片路径，则返回空字符串
+    handleExport() {
+      console.log('导出考勤数据，日期范围：', this.dateRange[0], this.dateRange[1]);
     },
-    // 获取学生数据 (异步函数)
+    // 获取学生数据
     async fetchStudents() {
       try {
         // 调用后端接口获取学生列表

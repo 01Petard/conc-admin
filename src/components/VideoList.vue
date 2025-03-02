@@ -1,73 +1,14 @@
 <template>
-  <div>
-    <!-- 搜索框和查询按钮 -->
-    <div class="search-wrapper">
-      <el-input
-        v-model="search"
-        size="medium"
-        placeholder="请输入姓名或学号"
-        clearable
-        class="search-input"
-      />
-      <el-button type="primary" size="medium" @click="handleSearch">查询</el-button>
-    </div>
-
-    <!-- 数据表格 -->
-    <el-table
-      ref="mytable"
-      :data="filteredData"
-      empty-text="暂无数据"
-      :row-class-name="showCss"
-      highlight-current-row
-      :show-header="true"
-      :fit="true"
-      size="medium"
-      :height="600"
-      border
-    >
-      <el-table-column align="center" prop="sno" label="学号"></el-table-column>
-      <el-table-column align="center" prop="sname" label="姓名"></el-table-column>
-
-      <!-- 人脸列，使用 slot 渲染图片 -->
-      <el-table-column align="center" label="人脸">
-        <template slot-scope="scope">
-          <img v-if="scope.row.faceimg" :src="scope.row.faceimg" alt="人脸图片" style="width: 50px; height: 50px; object-fit: cover;" />
-          <span v-else>无图片</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column align="center" prop="ssex" label="性别"></el-table-column>
-      <el-table-column align="center" prop="sdept" label="学院"></el-table-column>
-      <el-table-column align="center" prop="clazzName" label="班级"></el-table-column>
-      <el-table-column align="center" prop="sphone" label="手机"></el-table-column>
-
-      <el-table-column>
-
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            @click="handleEdit(scope.$index, scope.row)"
-            class="edit-btn"
-          >编辑
-          </el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            @click="handleDelete(scope.$index, scope.row)"
-            class="delete-btn"
-          >删除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-  </div>
+  <StudentList/>
 </template>
 
 <script>
 import axios from 'axios';
+import StudentList from "./StudentList.vue";
 
 export default {
   name: "VideoList",
+  components: {StudentList},
   data() {
     return {
       tableData: [],  // 学生数据

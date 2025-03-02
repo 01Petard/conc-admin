@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="table-container">
     <!-- 搜索框和查询按钮 -->
     <div class="search-wrapper">
       <el-input
@@ -22,20 +22,10 @@
       :show-header="true"
       :fit="true"
       size="medium"
-      :height="600"
       border
     >
       <el-table-column align="center" prop="sno" label="学号"></el-table-column>
       <el-table-column align="center" prop="sname" label="姓名"></el-table-column>
-
-      <!-- 人脸列，使用 slot 渲染图片 -->
-<!--  网络请求的方式    -->
-<!--      <el-table-column align="center" label="人脸">-->
-<!--        <template slot-scope="scope">-->
-<!--          <img v-if="scope.row.faceimg" :src="scope.row.faceimg" alt="人脸图片" style="width: 50px; height: 50px; object-fit: cover;" />-->
-<!--          <span v-else>无图片</span>-->
-<!--        </template>-->
-<!--      </el-table-column>-->
 
       <!-- 人脸列，使用 slot 渲染图片 -->
       <el-table-column align="center" label="人脸">
@@ -166,6 +156,37 @@ export default {
 </script>
 
 <style scoped>
+
+/* 让 table-container 适应内容高度 */
+.table-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* 确保表格外层的 div 占满高度 */
+div {
+  overflow: hidden;
+}
+
+/* 让页面高度自适应 */
+html, body {
+  height: auto;
+  overflow-x: hidden; /* 禁止横向滚动 */
+}
+
+/* 让搜索框和表格占据全部可用空间 */
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.el-table {
+  width: 100%;
+}
+
 /* 搜索框样式 */
 .search-wrapper {
   display: flex;

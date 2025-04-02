@@ -1,29 +1,32 @@
-# element
+# 学生课堂专注度管理系统V1.0
 
-> A Vue.js project
+`管理端`：https://github.com/01Petard/conc-admin
 
-## Build Setup
+`服务端`：https://github.com/01Petard/conc-server
 
-``` bash
-# install dependencies
-npm install
+`Python端`：https://github.com/01Petard/conc-python-api
 
-# serve with hot reload at localhost:8080
-npm run dev
+<hr>
+## 管理端技术栈：
 
-# build for production with minification
-npm run build
+- Nodejs版本：22.14.0
+- 软件包管理器：pnpm
 
-# build for production and view the bundle analyzer report
-npm run build --report
+- Vue2
+- Webpack
+- ElementUI（不是ElementUI Plus）
+- Vue Router
+
+## 项目启动与部署
+
+```shell
+pnpm install
 ```
 
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
-
-```bash
-npm install
+```shell
+pnpm run dev
 ```
 
-```bash
-npm run dev
+```shell
+pnpm run build
 ```

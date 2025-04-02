@@ -23,6 +23,7 @@ import FaceUpload from "../components/FaceUpload.vue";
 import ClassList from "../components/example/ClassList.vue";
 import VideoList from "../components/VideoList.vue";
 import VideoAdd from "../components/VideoAdd.vue";
+import Login from "../components/Login.vue";
 
 Vue.use(Router)
 
@@ -51,5 +52,8 @@ export default new Router({
     {path: '/class-list', component: ClassList},
     {path: '/class-add', component: ClassAdd},
     {path: '/face-upload', component: FaceUpload},
-  ]
+    {path: '/login', component: Login},
+    {path: '/', component: Login},
+  ],
+  mode: 'history'
 })

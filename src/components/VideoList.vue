@@ -1,5 +1,31 @@
 <template>
   <div class="table-container">
+    <!-- 编辑对话框 -->
+    <el-dialog
+      title="编辑视频信息"
+      :visible.sync="editDialogVisible"
+      width="30%"
+    >
+      <el-form :model="formData" label-width="80px">
+        <el-form-item label="班级名">
+          <el-input v-model="formData.vname"></el-input>
+        </el-form-item>
+        <el-form-item label="课程名">
+          <el-input v-model="formData.cname"></el-input>
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-button
+            :type="formData.status === 1 ? 'success' : 'danger'"
+          >
+            {{ formData.status === 1 ? '已处理' : '未处理' }}
+          </el-button>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitEdit">确 定</el-button>
+      </span>
+    </el-dialog>
     <!-- 搜索框和查询按钮 -->
     <div class="search-wrapper">
       <el-input
@@ -25,11 +51,11 @@
       border
     >
       <el-table-column align="center" prop="vname" label="班级名"></el-table-column>
-<!--      <el-table-column align="center" prop="createTime" label="上课时间"></el-table-column>-->
+      <!--      <el-table-column align="center" prop="createTime" label="上课时间"></el-table-column>-->
       <el-table-column align="center" prop="cname" label="课程名"></el-table-column>
       <el-table-column align="center" label="课堂视频">
         <template slot-scope="scope">
-          <img v-if="scope.row.vimg" :src="scope.row.vimg" alt="人脸图片" style="width: 50px; height: 50px; object-fit: cover;" />
+          <img v-if="scope.row.vimg" :src="scope.row.vimg" alt="人脸图片" style="width: 50px; height: 50px; object-fit: cover;"/>
           <span v-else>无图片</span>
         </template>
       </el-table-column>
@@ -47,15 +73,24 @@
           <div class="button-container">
             <el-button
               size="mini"
-              @click="handleEdit(scope.$index, scope.row)"
+              type="primary"
+              @click="handleEdit(scope.row)"
               class="edit-btn"
-            >处理</el-button>
-            <el-button
-              size="mini"
-              type="danger"
-              @click="handleDelete(scope.$index, scope.row)"
-              class="delete-btn"
-            >删除</el-button>
+            >编辑
+            </el-button>
+            <el-popconfirm
+              title="确定删除本条数据吗？"
+              @confirm="handleDeleteConfirm(scope.row)"
+              placement="top"
+            >
+              <el-button
+                slot="reference"
+                size="mini"
+                type="danger"
+                class="delete-btn"
+              >删除
+              </el-button>
+            </el-popconfirm>
           </div>
         </template>
       </el-table-column>
@@ -71,6 +106,13 @@ export default {
   name: "VideoList",
   data() {
     return {
+      editDialogVisible: false,
+      formData: {
+        vid: '',
+        vname: '',
+        cname: '',
+        status: 0
+      },
       tableData: [],  // 视频数据
       search: "",     // 搜索字段
     };
@@ -103,27 +145,37 @@ export default {
       console.log("搜索内容：", this.search);
       this.fetchStudents();  // 搜索后重新获取数据
     },
-    // 编辑操作
-    handleEdit(index, row) {
-      console.log("编辑", index, row);
-      // 跳转到编辑页面或弹出编辑框
+    // 编辑按钮点击
+    handleEdit(row) {
+      this.formData = {...row} // 复制行数据到表单
+      this.editDialogVisible = true
     },
-    // 删除操作
-    handleDelete(index, row) {
-      console.log("删除", index, row);
-      // 调用 API 删除
-      axios.delete(`/api/students/${row.sno}`).then(() => {
-        this.fetchStudents();  // 删除后刷新列表
-      });
-    },
-    // 获取本地图片路径
-    getLocalImagePath(facePath) {
-      if (facePath) {
-        // 将本地路径转换为 file 协议路径
-        return `file:///${facePath.replace(/\\/g, '/')}`;
+
+    // 提交编辑
+    async submitEdit() {
+      try {
+        const response = await axios.put('/api/videos', this.formData)
+        if (response.data.code === 10000) {
+          this.$message.success('修改成功')
+          this.fetchVideos()
+          this.editDialogVisible = false
+        }
+      } catch (error) {
+        this.$message.error('修改失败')
       }
-      return ""; // 如果没有图片路径，则返回空字符串
     },
+
+    // 删除确认
+    async handleDeleteConfirm(row) {
+      try {
+        await axios.delete(`/api/videos/${row.vid}`)
+        this.$message.success('删除成功')
+        this.fetchVideos()
+      } catch (error) {
+        this.$message.error('删除失败')
+      }
+    },
+
     // 获取视频数据 (异步函数)
     async fetchVideos() {
       try {
@@ -218,6 +270,7 @@ html, body {
   font-size: 14px;
   padding: 10px;
 }
+
 .button-container {
   display: flex;
   justify-content: center; /* 居中按钮 */

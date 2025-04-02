@@ -1,5 +1,86 @@
 <template>
   <div class="table-container">
+    <!-- 编辑对话框 -->
+    <el-dialog
+      title="编辑学生信息"
+      :visible.sync="editDialogVisible"
+      width="80%"
+      :fullscreen="false"
+      :close-on-click-modal="false"
+    >
+      <div class="dialog-container">
+        <el-form
+          :model="formData"
+          label-width="100px"
+          class="custom-form"
+        >
+          <!-- 人脸照片（缩小尺寸并居中） -->
+          <el-form-item label="人脸照片">
+            <div class="face-container">
+              <img
+                v-if="formData.faceimg"
+                :src="formData.faceimg"
+                alt="人脸图片"
+                style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #ddd;"
+              />
+              <span v-else style="color: #999">暂无照片</span>
+            </div>
+          </el-form-item>
+
+          <!-- 表单内容分组 -->
+          <div class="form-group">
+            <!-- 基础信息（学号、姓名、性别） -->
+            <el-row :gutter="20">
+              <el-col :span="8">
+                <el-form-item label="学号">
+                  <el-input v-model="formData.sno" :disabled="true"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="姓名">
+                  <el-input v-model="formData.sname"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="性别">
+                  <el-select v-model="formData.ssex" placeholder="请选择性别">
+                    <el-option label="男" value="男"></el-option>
+                    <el-option label="女" value="女"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
+
+          <!-- 学院、班级、手机号（并排布局） -->
+          <div class="form-group">
+            <el-row :gutter="20">
+              <el-col :span="8">
+                <el-form-item label="学院">
+                  <el-input v-model="formData.sdept"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="班级">
+                  <el-input v-model="formData.clazzName"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="手机号">
+                  <el-input v-model="formData.sphone"></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
+        </el-form>
+
+        <!-- 按钮区域 -->
+        <span slot="footer" class="dialog-footer" style="float: right;">
+          <el-button @click="editDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="submitEdit">确 定</el-button>
+       </span>
+      </div>
+    </el-dialog>
     <!-- 搜索框和查询按钮 -->
     <div class="search-wrapper">
       <el-input
@@ -46,7 +127,7 @@
       <!-- 人脸列，使用 slot 渲染图片 -->
       <el-table-column align="center" label="人脸">
         <template slot-scope="scope">
-          <img v-if="scope.row.faceimg" :src="scope.row.faceimg" alt="人脸图片" style="width: 50px; height: 50px; object-fit: cover;" />
+          <img v-if="scope.row.faceimg" :src="scope.row.faceimg" alt="人脸图片" style="width: 50px; height: 50px; object-fit: cover;"/>
           <span v-else>无图片</span>
         </template>
       </el-table-column>
@@ -61,15 +142,25 @@
           <div class="button-container">
             <el-button
               size="mini"
-              @click="handleEdit(scope.$index, scope.row)"
+              type="primary"
+              @click="handleEdit(scope.row)"
               class="edit-btn"
-            >编辑</el-button>
-            <el-button
-              size="mini"
-              type="danger"
-              @click="handleDelete(scope.$index, scope.row)"
-              class="delete-btn"
-            >删除</el-button>
+            >编辑
+            </el-button>
+
+            <el-popconfirm
+              title="确定删除该学生信息吗？"
+              @confirm="handleDeleteConfirm(scope.row)"
+              placement="top"
+            >
+              <el-button
+                slot="reference"
+                size="mini"
+                type="danger"
+                class="delete-btn"
+              >删除
+              </el-button>
+            </el-popconfirm>
           </div>
         </template>
       </el-table-column>
@@ -85,6 +176,15 @@ export default {
   name: "StudentList",
   data() {
     return {
+      editDialogVisible: false,
+      formData: {
+        sno: '',
+        sname: '',
+        ssex: '',
+        sdept: '',
+        clazzName: '',
+        sphone: ''
+      },
       tableData: [],  // 学生数据
       search: "",     // 搜索字段
       dateRange: [], // 存储日期范围 [开始日期, 结束日期]
@@ -118,18 +218,38 @@ export default {
       console.log('查询条件：', this.search, '日期范围：', this.dateRange[0], this.dateRange[1]);
       this.fetchStudents();  // 搜索后重新获取数据
     },
-    // 编辑操作
-    handleEdit(index, row) {
-      console.log("编辑", index, row);
-      // 跳转到编辑页面或弹出编辑框
+    // 修改后的编辑方法
+    handleEdit(row) {
+      this.formData = {
+        ...row,
+      }
+      this.editDialogVisible = true
+
     },
-    // 删除操作
-    handleDelete(index, row) {
-      console.log("删除", index, row);
-      // 调用 API 删除
-      axios.delete(`/api/students/${row.sno}`).then(() => {
-        this.fetchStudents();  // 删除后刷新列表
-      });
+
+    // 提交编辑
+    async submitEdit() {
+      try {
+        const response = await axios.put('/api/students', this.formData)
+        if (response.data.code === 10000) {
+          this.$message.success('修改成功')
+          await this.fetchStudents()
+          this.editDialogVisible = false
+        }
+      } catch (error) {
+        this.$message.error('修改失败')
+      }
+    },
+
+    // 修改后的删除方法
+    async handleDeleteConfirm(row) {
+      try {
+        await axios.delete(`/api/students/${row.sno}`)
+        this.$message.success('删除成功')
+        await this.fetchStudents()
+      } catch (error) {
+        this.$message.error('删除失败')
+      }
     },
     handleExport() {
       console.log('导出考勤数据，日期范围：', this.dateRange[0], this.dateRange[1]);
@@ -240,5 +360,56 @@ html, body {
 
 .button-container .el-button {
   margin: 0 5px; /* 给按钮之间添加一些间距 */
+}
+
+/* 调整图片展示样式 */
+.el-form-item__content img {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dialog-container {
+  max-height: 80vh; /* 对话框内容最大高度（根据需求调整） */
+  overflow-y: auto; /* 超出时显示滚动条 */
+  padding: 20px;
+}
+
+.custom-form {
+  padding: 0 20px;
+  margin-bottom: 20px;
+}
+
+/* 缩小 el-form-item 的内边距 */
+.el-form-item {
+  margin-bottom: 15px !important; /* 减少垂直间距 */
+}
+
+/* 人脸容器样式 */
+.face-container {
+  text-align: center;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+/* 表单分组样式 */
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* 调整 el-row 的布局 */
+.el-row {
+  margin-bottom: 15px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* 确保表单元素宽度自适应 */
+.el-col {
+  .el-form-item__content {
+    width: 100%;
+  }
 }
 </style>

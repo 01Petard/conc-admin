@@ -32,6 +32,12 @@
       <el-button size="medium" type="primary">点击上传视频</el-button>
     </el-upload>
 
+    <!-- 图片预览 -->
+    <div v-if="imageUrl" class="image-preview">
+      <h3>预览图：</h3>
+      <img :src="imageUrl" alt="Uploaded Face" class="preview-image"/>
+    </div>
+
     <!-- 提交按钮 -->
     <div>
       <el-button
@@ -55,31 +61,50 @@ export default {
       video: {
         vname: '',
         cname: '',
-        fileName: ''
+        fileName: '',
       },
+      imageUrl: '', // 图片预览地址
     };
   },
   methods: {
-    // 文件变化时的处理逻辑
+    // // 文件变化时的处理逻辑
+    // handleChange(file) {
+    //   const isImage = file.raw.type.startsWith('mp4/');
+    //   if (!isImage) {
+    //     this.$message.error('只能上传视频格式文件');
+    //     return;
+    //   }
+    //
+    //   // 保存文件名和文件对象
+    //   this.video.fileName = file.name;
+    //
+    // },
+    // // 在上传前检查文件格式
+    // beforeUpload(file) {
+    //   const isImage = file.type.startsWith('mp4/');
+    //   if (!isImage) {
+    //     this.$message.error('只能上传视频格式文件');
+    //   }
+    //   return isImage;
+    // },
+
+
     handleChange(file) {
-      const isImage = file.raw.type.startsWith('mp4/');
-      if (!isImage) {
-        this.$message.error('只能上传视频格式文件');
-        return;
-      }
-
-      // 保存文件名和文件对象
-      this.video.fileName = file.name;
-
+      this.fileName = file.name; // 获取文件名称
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imageUrl = reader.result; // 将图片预览存储在 imageUrl 中
+      };
+      reader.readAsDataURL(file.raw); // 将文件转为 base64 编码
     },
-    // 在上传前检查文件格式
     beforeUpload(file) {
-      const isImage = file.type.startsWith('mp4/');
+      const isImage = file.type.startsWith('image/');
       if (!isImage) {
-        this.$message.error('只能上传视频格式文件');
+        this.$message.error('只能上传图片格式文件');
       }
       return isImage;
     },
+
     async handleSubmit() {
       try {
         // 构造表单数据

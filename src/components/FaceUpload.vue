@@ -1,6 +1,6 @@
 <template>
   <div class="face-upload-container">
-    <h1>个人脸上传</h1>
+    <h1>人脸信息绑定</h1>
     <p>请上传您的个人头像（图片格式）并填写您的姓名</p>
 
     <!-- 姓名输入框 -->
@@ -38,7 +38,7 @@
         size="medium"
         @click="handleSubmit"
       >
-        提交上传
+        提交
       </el-button>
     </div>
   </div>

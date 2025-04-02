@@ -58,8 +58,8 @@
 
           <!-- 人脸库管理 -->
           <el-submenu index="face-library-management">
-            <template slot="title">人脸库管理</template>
-            <el-menu-item index="face-upload" @click="navigateTo('/face-upload')">上传人脸</el-menu-item>
+            <template slot="title">人脸管理</template>
+            <el-menu-item index="face-upload" @click="navigateTo('/face-upload')">绑定人脸</el-menu-item>
           </el-submenu>
 
         </el-menu>
@@ -72,7 +72,7 @@
 
     <!-- 页脚 -->
     <el-footer class="footer">
-      <p>© 2025 学生课堂专注度管理系统 | 由 黄泽校 开发</p>
+      <p>© 2025 学生课堂专注度管理系统</p>
 <!--      <p>备案号：京ICP备20250001号</p>-->
     </el-footer>
   </div>

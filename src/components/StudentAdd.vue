@@ -132,8 +132,8 @@ export default {
         this.student.ssex &&
         this.student.sdept &&
         this.student.clazzId &&
-        this.student.sphone &&
-        this.student.faceimg
+        this.student.sphone
+        // this.student.faceimg //可以在新增学生时不上传人脸，后续可以绑定人脸时再添加
       );
     },
   },
@@ -234,7 +234,7 @@ export default {
         sphone: '',
         faceimg: '',
       };
-      this.classes = []; // 重置班级列表
+      this.classes = [];
       this.previewUrl = '';
       this.fileObject = null;
       this.$refs.upload.clearFiles();

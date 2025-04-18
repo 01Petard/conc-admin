@@ -53,7 +53,7 @@
       <el-table-column align="center" prop="vname" label="班级名"></el-table-column>
       <!--      <el-table-column align="center" prop="createTime" label="上课时间"></el-table-column>-->
       <el-table-column align="center" prop="cname" label="课程名"></el-table-column>
-      <el-table-column align="center" label="课堂视频">
+      <el-table-column align="center" label="视频预览图">
         <template slot-scope="scope">
           <img v-if="scope.row.vimg" :src="scope.row.vimg" alt="人脸图片" style="width: 50px; height: 50px; object-fit: cover;"/>
           <span v-else>无图片</span>

@@ -106,7 +106,7 @@ export default {
       });
     },
     login2(){
-      this.$router.push({path: "/dashboard"})
+      this.$router.push('/main/dashboard');
     },
     //重置表单内容
     resetLoginForm() {

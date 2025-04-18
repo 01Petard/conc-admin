@@ -4,8 +4,7 @@
     <el-dialog
       title="编辑学生信息"
       :visible.sync="editDialogVisible"
-      width="80%"
-      :fullscreen="false"
+      width="50%"
       :close-on-click-modal="false"
     >
       <div class="dialog-container">
@@ -41,7 +40,7 @@
                   <el-input v-model="formData.sname"></el-input>
                 </el-form-item>
               </el-col>
-              <el-col :span="8">
+              <el-col :span="6">
                 <el-form-item label="性别">
                   <el-select v-model="formData.ssex" placeholder="请选择性别">
                     <el-option label="男" value="男"></el-option>
@@ -55,16 +54,40 @@
           <!-- 学院、班级、手机号（并排布局） -->
           <div class="form-group">
             <el-row :gutter="20">
+              <!-- 学院 -->
               <el-col :span="8">
                 <el-form-item label="学院">
-                  <el-input v-model="formData.sdept"></el-input>
+                  <el-select
+                    v-model="formData.sdept"
+                    placeholder="请选择学院"
+                    @change="formData.clazzId = ''"
+                  >
+                    <el-option
+                      v-for="dept in departments"
+                      :key="dept.deptId"
+                      :label="dept.deptName"
+                      :value="dept.deptId"
+                    />
+                  </el-select>
                 </el-form-item>
               </el-col>
+              <!-- 班级 -->
               <el-col :span="8">
                 <el-form-item label="班级">
-                  <el-input v-model="formData.clazzName"></el-input>
+                  <el-select
+                    v-model="formData.clazzId"
+                    placeholder="请选择班级"
+                  >
+                    <el-option
+                      v-for="clazz in classes"
+                      :key="clazz.clazzId"
+                      :label="clazz.clazzName"
+                      :value="clazz.clazzId"
+                    />
+                  </el-select>
                 </el-form-item>
               </el-col>
+              <!-- 手机号 -->
               <el-col :span="8">
                 <el-form-item label="手机号">
                   <el-input v-model="formData.sphone"></el-input>
@@ -76,11 +99,18 @@
 
         <!-- 按钮区域 -->
         <span slot="footer" class="dialog-footer" style="float: right;">
-          <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitEdit">确 定</el-button>
+          <el-button @click="editDialogVisible = false">
+            取 消
+          </el-button>
+          <el-button type="primary" @click="submitEdit">
+            确 定
+          </el-button>
        </span>
       </div>
     </el-dialog>
+
+
+
     <!-- 搜索框和查询按钮 -->
     <div class="search-wrapper">
       <el-input
@@ -107,6 +137,7 @@
 
       <el-button type="primary" size="medium" @click="handleExport">导出学生考勤数据</el-button>
     </div>
+
 
 
     <!-- 数据表格 -->
@@ -176,18 +207,31 @@ export default {
   name: "StudentList",
   data() {
     return {
+      departments: [], // 存储所有学院
+      classes: [],     // 存储当前选中学院的班级
+      selectedDeptId: null, // 当前选中的学院ID
       editDialogVisible: false,
-      formData: {
-        sno: '',
+      editClassFormData: {
+        sno: null,
         sname: '',
         ssex: '',
         sdept: '',
         clazzName: '',
         sphone: ''
       },
+      formData: {
+        sno: '',
+        sname: '',
+        ssex: '',
+        sdept: '',     // 存储学院ID
+        deptName: '',   // 显示学院名称
+        clazzId: '',    // 存储班级ID
+        clazzName: '',  // 显示班级名称
+        sphone: ''
+      },
       tableData: [],  // 学生数据
       search: "",     // 搜索字段
-      dateRange: [], // 存储日期范围 [开始日期, 结束日期]
+      dateRange: [],  // 存储日期范围 [开始日期, 结束日期]
     };
   },
   computed: {
@@ -201,6 +245,74 @@ export default {
     },
   },
   methods: {
+    // 获取所有学院及班级列表
+    async getDepartments() {
+      try {
+        const res = await axios.get('http://localhost:18080/dept/list');
+        if (res.data.code === 10000) {
+          this.departments = res.data.data;
+        }
+      } catch (err) {
+        this.$message.error('获取学院信息失败');
+      }
+    },
+
+    // 根据学院ID获取班级列表
+    async getClasses(deptId) {
+      try {
+        const res = await axios.get(`http://localhost:18080/clazz/list?deptId=${deptId}`);
+        if (res.data.code === 10000) {
+          this.classes = res.data.data.map(clazz => ({
+            id: clazz.id,
+            name: clazz.name
+          }));
+
+          // 默认选中第一个班级（可选）
+          if (this.classes.length > 0) {
+            this.formData.clazzName = this.classes[0].name;
+          }
+        } else {
+          this.$message.error('获取班级列表失败');
+        }
+      } catch (err) {
+        this.$message.error('请求失败，请检查网络或接口');
+      }
+    },
+
+    // 辅助方法：根据学院名称查找ID
+    findDeptId(deptName) {
+      const dept = this.departments.find(d => d.deptName === deptName);
+      return dept ? dept.deptId : '';
+    },
+    // 辅助方法：根据班级名称查找ID
+    findClazzId(clazzName) {
+      return this.classes.find(c => c.clazzName === clazzName).clazzId || '';
+    },
+    // 编辑学生信息
+    async handleEdit(row) {
+      // 先获取最新学院数据
+      await this.getDepartments();
+
+      // 匹配当前学生的学院ID
+      const currentDept = this.departments.find(d => d.deptName === row.sdept);
+
+      // 匹配当前学生的班级ID
+      const currentClazz = currentDept.clazzList.find(c => c.clazzName === row.clazzName);
+
+      // 初始化表单数据
+      this.formData = {
+        ...row,
+        sdept: currentDept.deptId || '',     // 绑定学院ID
+        clazzId: currentClazz.clazzId || ''   // 绑定班级ID
+      };
+
+      // 初始化班级列表
+      this.classes = currentDept.clazzList || [];
+
+      this.editDialogVisible = true;
+    },
+
+
     // 表格行样式
     showCss({row, rowIndex}) {
       return rowIndex % 2 === 0 ? "warning-row" : "success-row";
@@ -218,37 +330,44 @@ export default {
       console.log('查询条件：', this.search, '日期范围：', this.dateRange[0], this.dateRange[1]);
       this.fetchStudents();  // 搜索后重新获取数据
     },
-    // 修改后的编辑方法
-    handleEdit(row) {
-      this.formData = {
-        ...row,
-      }
-      this.editDialogVisible = true
-
-    },
 
     // 提交编辑
     async submitEdit() {
+      const payload = {
+        sno: this.formData.sno,
+        sname: this.formData.sname,
+        ssex: this.formData.ssex,
+        sdept: this.formData.deptName,      // 提交学院ID
+        clazzId: this.formData.clazzId,  // 提交班级ID
+        sphone: this.formData.sphone
+      };
+
       try {
-        const response = await axios.put('/api/students', this.formData)
-        if (response.data.code === 10000) {
-          this.$message.success('修改成功')
-          await this.fetchStudents()
-          this.editDialogVisible = false
-        }
+        await axios.put('http://localhost:18080/student/update', payload);
+        this.$message.success('修改成功');
+        await this.fetchStudents();
+        this.editDialogVisible = false;
       } catch (error) {
-        this.$message.error('修改失败')
+        this.$message.error('修改失败');
       }
     },
 
-    // 修改后的删除方法
+    // 删除学生信息
     async handleDeleteConfirm(row) {
       try {
-        await axios.delete(`/api/students/${row.sno}`)
-        this.$message.success('删除成功')
-        await this.fetchStudents()
-      } catch (error) {
-        this.$message.error('删除失败')
+        // 使用查询参数发送删除请求
+        const res = await axios.delete('http://localhost:18080/student/delete', {
+          params: { sno: row.sno } // 将 sno 作为查询参数传递
+        });
+
+        if (res.data.code === 10000) {
+          this.$message.success('删除成功');
+          await this.fetchStudents(); // 刷新表格数据
+        } else {
+          this.$message.error(res.data.msg || '删除失败');
+        }
+      } catch (err) {
+        this.$message.error('请求失败，请检查网络或接口');
       }
     },
     handleExport() {
@@ -284,11 +403,45 @@ export default {
   mounted() {
     this.fetchStudents();
   },
+  watch: {
+    'formData.sdept'(newVal) {
+      const selectedDept = this.departments.find(d => d.deptId === newVal);
+      this.classes = selectedDept.clazzList || [];
+      // 自动匹配原有班级（当学院未改变时保留原选择）
+      if(selectedDept.clazzList.some(c => c.clazzId === this.formData.clazzId)) {
+        return;
+      }
+      this.formData.clazzId = '';
+    }
+  }
 };
 </script>
 
 <style scoped>
+/* 基础样式 */
+.dialog-container {
+  max-height: 90vh; /* 对话框内容最大高度 */
+  overflow-y: auto; /* 超出显示滚动条 */
+  padding: 20px;
+}
 
+.custom-form {
+  width: 100%; /* 确保表单占满容器 */
+}
+
+/* 人脸照片容器样式 */
+.face-container {
+  text-align: center;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+/* 按钮区域居中 */
+.dialog-footer {
+  text-align: right; /* 按钮右对齐 */
+  padding-top: 20px;
+}
 /* 让 table-container 适应内容高度 */
 .table-container {
   display: flex;
@@ -329,11 +482,6 @@ html, body {
 .search-input {
   width: 300px;
   margin-right: 10px;
-}
-
-/* 清空选择按钮样式 */
-.clear-btn {
-  margin-top: 20px;
 }
 
 /* 按钮样式 */
@@ -395,21 +543,5 @@ html, body {
 /* 表单分组样式 */
 .form-group {
   margin-bottom: 15px;
-}
-
-/* 调整 el-row 的布局 */
-.el-row {
-  margin-bottom: 15px;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-/* 确保表单元素宽度自适应 */
-.el-col {
-  .el-form-item__content {
-    width: 100%;
-  }
 }
 </style>

@@ -30,21 +30,36 @@
       <el-option label="女" value="女"></el-option>
     </el-select>
 
-    <!-- 学院输入框 -->
-    <el-input
+    <!-- 学院选择 -->
+    <el-select
       v-model="student.sdept"
-      placeholder="请输入学院"
+      placeholder="请选择学院"
       size="medium"
       class="input-field"
-    ></el-input>
+      @change="handleDeptChange(student.sdept)"
+    >
+      <el-option
+        v-for="dept in departments"
+        :key="dept.deptId"
+        :label="dept.deptName"
+        :value="dept.deptId"
+      />
+    </el-select>
 
-    <!-- 班级输入框 -->
-    <el-input
-      v-model="student.clazz_name"
-      placeholder="请输入班级"
+    <!-- 班级选择 -->
+    <el-select
+      v-model="student.clazzId"
+      placeholder="请选择班级"
       size="medium"
       class="input-field"
-    ></el-input>
+    >
+      <el-option
+        v-for="clazz in classes"
+        :key="clazz.clazzId"
+        :label="clazz.clazzName"
+        :value="clazz.clazzId"
+      />
+    </el-select>
 
     <!-- 手机输入框 -->
     <el-input
@@ -94,16 +109,18 @@ export default {
   data() {
     return {
       student: {
-        sno: '', // 学号
-        sname: '', // 姓名
-        ssex: '', // 性别
-        sdept: '', // 学院
-        clazz_name: '', // 班级
-        sphone: '', // 手机
-        faceimg: '', // 文件名
+        sno: '',       // 学号
+        sname: '',     // 姓名
+        ssex: '',      // 性别
+        sdept: '',     // 学院名称
+        clazzId: '',   // 班级ID
+        sphone: '',    // 手机
+        faceimg: '',   // 文件名
       },
-      previewUrl: '', // 图片预览临时地址
-      fileObject: null, // 文件对象
+      departments: [], // 学院列表
+      classes: [],     // 班级列表
+      previewUrl: '',  // 图片预览地址
+      fileObject: null // 文件对象
     };
   },
   computed: {
@@ -114,13 +131,42 @@ export default {
         this.student.sname &&
         this.student.ssex &&
         this.student.sdept &&
-        this.student.clazz_name &&
+        this.student.clazzId &&
         this.student.sphone &&
         this.student.faceimg
       );
     },
   },
   methods: {
+    // 获取学院列表
+    async getDepartments() {
+      try {
+        const res = await axios.get('http://localhost:18080/dept/listAll');
+        if (res.data.code === 10000) {
+          this.departments = res.data.data;
+        }
+      } catch (err) {
+        this.$message.error('获取学院信息失败');
+      }
+    },
+
+    // 学院选择变化
+    async handleDeptChange(deptId) {
+      this.classes = [];
+      this.student.clazzId = '';
+
+      try {
+        const res = await axios.get('http://localhost:18080/clazz/listByDeptId', {params: {deptId: deptId}});
+        if (res.data.code === 10000) {
+          this.classes = res.data.data;
+        } else {
+          this.$message.error(res.data.msg || '获取班级失败');
+        }
+      } catch (err) {
+        this.$message.error('请求班级信息失败，请检查网络');
+      }
+    },
+
     // 文件变化时的处理逻辑
     handleChange(file) {
       const isImage = file.raw.type.startsWith('image/');
@@ -145,28 +191,28 @@ export default {
       return isImage;
     },
     async handleSubmit() {
-      try {
-        // 构造表单数据
-        const formData = new FormData();
-        formData.append('sno', this.student.sno);
-        formData.append('sname', this.student.sname);
-        formData.append('ssex', this.student.ssex);
-        formData.append('sdept', this.student.sdept);
-        formData.append('clazz_name', this.student.clazz_name);
-        formData.append('sphone', this.student.sphone);
-        formData.append('faceimg', this.student.faceimg); // 直接上传文件对象
+      if (!this.isFormValid) {
+        return this.$message.warning('请填写完整信息');
+      }
 
-        // 发送 POST 请求
+      const formData = new FormData();
+      formData.append('sno', this.student.sno);
+      formData.append('sname', this.student.sname);
+      formData.append('ssex', this.student.ssex);
+      formData.append('sdeptId', this.student.sdept);
+      formData.append('clazzId', this.student.clazzId);
+      formData.append('sphone', this.student.sphone);
+      formData.append('faceimg', this.student.faceimg);
+
+      try {
         const response = await axios.post(
           'http://localhost:18080/student/add',
           formData,
-          {
-            headers: {'Content-Type': 'multipart/form-data'}, // 确保设置正确的 Content-Type
-          }
+          {headers: {'Content-Type': 'multipart/form-data'}}
         );
 
         if (response.data.code === 10000) {
-          this.$message.success('学生信息添加成功');
+          this.$message.success('添加成功');
           this.resetForm();
         } else {
           this.$message.error('添加失败: ' + response.data.msg);
@@ -184,21 +230,37 @@ export default {
         sname: '',
         ssex: '',
         sdept: '',
-        clazz_name: '',
+        clazzId: '',
         sphone: '',
         faceimg: '',
       };
+      this.classes = []; // 重置班级列表
       this.previewUrl = '';
       this.fileObject = null;
       this.$refs.upload.clearFiles();
-      URL.revokeObjectURL(this.previewUrl); // 释放预览URL
-    },
+      URL.revokeObjectURL(this.previewUrl);
+    }
+  },
+  mounted() {
+    this.getDepartments();
   },
 };
 </script>
 
 
 <style scoped>
+/* 样式保持不变 */
+.face-upload-container {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.input-field {
+  width: 300px;
+  margin: 10px auto;
+  display: block;
+}
+
 .face-upload-container {
   text-align: center;
   margin-top: 50px;

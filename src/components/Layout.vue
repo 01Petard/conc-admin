@@ -92,8 +92,7 @@ export default {
       this.$router.push(path);
     },
     logout() {
-      console.log("退出登录");
-      // this.$router.push("/login");
+      this.$router.push("/login");
     },
     updateTime() {
       this.currentTime = new Date().toLocaleString();

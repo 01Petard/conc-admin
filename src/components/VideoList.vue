@@ -50,16 +50,14 @@
       size="medium"
       border
     >
-      <el-table-column align="center" prop="vname" label="班级名"></el-table-column>
-      <!--      <el-table-column align="center" prop="createTime" label="上课时间"></el-table-column>-->
-      <el-table-column align="center" prop="cname" label="课程名"></el-table-column>
+      <el-table-column align="center" prop="vname" label="视频名称"></el-table-column>
+      <el-table-column align="center" prop="cname" label="课程名称"></el-table-column>
       <el-table-column align="center" label="视频预览图">
         <template slot-scope="scope">
           <img v-if="scope.row.vimg" :src="scope.row.vimg" alt="人脸图片" style="width: 50px; height: 50px; object-fit: cover;"/>
           <span v-else>无图片</span>
         </template>
       </el-table-column>
-
       <el-table-column align="center" prop="status" label="处理状态">
         <template slot-scope="scope">
           <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">
@@ -67,29 +65,12 @@
           </el-tag>
         </template>
       </el-table-column>
-
       <el-table-column>
         <template slot-scope="scope">
           <div class="button-container">
-            <el-button
-              size="mini"
-              type="primary"
-              @click="handleEdit(scope.row)"
-              class="edit-btn"
-            >编辑
-            </el-button>
-            <el-popconfirm
-              title="确定删除本条数据吗？"
-              @confirm="handleDeleteConfirm(scope.row)"
-              placement="top"
-            >
-              <el-button
-                slot="reference"
-                size="mini"
-                type="danger"
-                class="delete-btn"
-              >删除
-              </el-button>
+            <el-button size="mini" type="primary" @click="handleEdit(scope.row)" class="edit-btn">编辑</el-button>
+            <el-popconfirm title="确定删除本条数据吗？" @confirm="handleDeleteConfirm(scope.row)" placement="top">
+              <el-button slot="reference" size="mini" type="danger" class="delete-btn">删除</el-button>
             </el-popconfirm>
           </div>
         </template>
@@ -122,8 +103,8 @@ export default {
       return this.tableData.filter(
         (data) =>
           !this.search ||
-          data.sname.toLowerCase().includes(this.search.toLowerCase()) ||
-          data.sno.toString().includes(this.search)
+          data.vname.toLowerCase().includes(this.search.toLowerCase()) ||  // 改为视频名称字段 vname
+          data.cname.toLowerCase().includes(this.search.toLowerCase())     // 改为课程名称字段 cname
       );
     },
   },
@@ -143,7 +124,6 @@ export default {
     // 搜索功能
     handleSearch() {
       console.log("搜索内容：", this.search);
-      this.fetchStudents();  // 搜索后重新获取数据
     },
     // 编辑按钮点击
     handleEdit(row) {
@@ -154,23 +134,38 @@ export default {
     // 提交编辑
     async submitEdit() {
       try {
-        const response = await axios.put('/api/videos', this.formData)
+        // 使用 URLSearchParams 构建表单编码的请求体
+        const params = new URLSearchParams();
+        params.append('vid', this.formData.vid);
+        params.append('vname', this.formData.vname);
+        params.append('cname', this.formData.cname);
+
+        const response = await axios.put('http://localhost:18080/video/update', params, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        });
+
         if (response.data.code === 10000) {
-          this.$message.success('修改成功')
-          this.fetchVideos()
-          this.editDialogVisible = false
+          this.$message.success('修改成功');
+          await this.fetchVideos();
+          this.editDialogVisible = false;
         }
       } catch (error) {
-        this.$message.error('修改失败')
+        this.$message.error('修改失败');
       }
     },
 
     // 删除确认
     async handleDeleteConfirm(row) {
       try {
-        await axios.delete(`/api/videos/${row.vid}`)
+        await axios.delete('http://localhost:18080/video/delete', {
+          params: {
+            vid: row.vid
+          }
+        })
         this.$message.success('删除成功')
-        this.fetchVideos()
+        await this.fetchVideos()
       } catch (error) {
         this.$message.error('删除失败')
       }

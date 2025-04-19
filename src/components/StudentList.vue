@@ -120,22 +120,21 @@
         clearable
         class="search-input"
       />
-
       <el-button type="primary" size="medium" @click="handleSearch">查询学生信息</el-button>
 
-      <!-- 日期范围选择组件 -->
-      <el-date-picker
-        v-model="dateRange"
-        type="daterange"
-        range-separator="至"
-        start-placeholder="开始日期"
-        end-placeholder="结束日期"
-        value-format="yyyy-MM-dd"
-        class="date-picker"
-        style="margin: 0 10px 0 50px;height: 36px"
-      />
+<!--      &lt;!&ndash; 日期范围选择组件 &ndash;&gt;-->
+<!--      <el-date-picker-->
+<!--        v-model="dateRange"-->
+<!--        type="daterange"-->
+<!--        range-separator="至"-->
+<!--        start-placeholder="开始日期"-->
+<!--        end-placeholder="结束日期"-->
+<!--        value-format="yyyy-MM-dd"-->
+<!--        class="date-picker"-->
+<!--        style="margin: 0 10px 0 50px;height: 36px"-->
+<!--      />-->
 
-      <el-button type="primary" size="medium" @click="handleExport">导出学生考勤数据</el-button>
+<!--      <el-button type="primary" size="medium" @click="handleExport">导出学生考勤数据</el-button>-->
     </div>
 
 

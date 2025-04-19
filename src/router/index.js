@@ -76,23 +76,23 @@ Vue.use(Router)
 export default new Router({
   routes: [
     // 登录页面作为顶层路由，不使用布局
-    { path: '/login', component: Login },
+    {path: '/login', component: Login},
     // 重定向根路径到登录页
-    { path: '/', redirect: '/login' },
+    {path: '/', redirect: '/login'},
 
     // 主界面布局（包含侧边栏、头部等）
     {
       path: '/main', // 主界面的入口路径
       component: Layout,
       children: [
-        { path: 'dashboard', component: Dashboard }, // 首页
-        { path: 'dept-list', component: DeptList },
-        { path: 'clazz-list', component: ClazzList },
-        { path: 'student-list', component: StudentList },
-        { path: 'student-add', component: StudentAdd },
-        { path: 'video-list', component: VideoList },
-        { path: 'video-add', component: VideoAdd },
-        { path: 'face-upload', component: FaceUpload },
+        {path: 'dashboard', component: Dashboard}, // 首页
+        {path: 'dept-list', component: DeptList},
+        {path: 'clazz-list', component: ClazzList},
+        {path: 'student-list', component: StudentList},
+        {path: 'student-add', component: StudentAdd},
+        {path: 'video-list', component: VideoList},
+        {path: 'video-add', component: VideoAdd},
+        {path: 'face-upload', component: FaceUpload},
       ]
     }
   ],

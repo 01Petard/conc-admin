@@ -16,8 +16,9 @@
         <el-form-item label="状态">
           <el-button
             :type="formData.status === 1 ? 'success' : 'danger'"
+            @click="() => this.formData.status = this.formData.status === 1 ? 0 : 1"
           >
-            {{ formData.status === 1 ? '已处理' : '未处理' }}
+          {{ formData.status === 1 ? '已处理' : '未处理' }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -139,6 +140,7 @@ export default {
         params.append('vid', this.formData.vid);
         params.append('vname', this.formData.vname);
         params.append('cname', this.formData.cname);
+        params.append('status', this.formData.status);
 
         const response = await axios.put('http://localhost:18080/video/update', params, {
           headers: {

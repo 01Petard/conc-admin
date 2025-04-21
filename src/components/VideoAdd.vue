@@ -29,7 +29,7 @@
       :auto-upload="false"
       ref="upload"
     >
-      <el-button size="medium" type="primary">点击上传视频</el-button>
+      <el-button size="medium" type="primary">点击添加视频预览图</el-button>
     </el-upload>
 
     <!-- 图片预览 -->

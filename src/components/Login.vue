@@ -34,8 +34,8 @@ export default {
   data() {
     return {
       loginForm: {
-        username: "admin",
-        password: "admin"
+        username: "",
+        password: ""
       },
       loginRules: {
         username: [
@@ -57,8 +57,13 @@ export default {
             password: this.loginForm.password
           })
             .then(response => {
-              console.log('登录成功:', response.data);
-              this.$router.push('/main/dashboard');
+              if (response.data.code === 10000){
+                console.log('登录成功:', response.data);
+                this.$router.push('/main/dashboard');
+              }else if (response.data.code === 20000){
+                console.log('登录失败:', response.data);
+                this.$message.error('用户名或密码错误');
+              }
             })
             .catch(error => {
               console.error('登录失败:', error);

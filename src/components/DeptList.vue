@@ -76,7 +76,7 @@
       </el-form>
       <span slot="footer">
         <el-button @click="addDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitAdd">确 定</el-button>
+        <el-button type="primary" @click="submitAdd()">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -409,26 +409,34 @@ export default {
     },
 
     async submitAdd() {
-      if (!this.addFormData.deptName.trim()) {
+      // 检查学院名称是否为空
+      if (!this.formData.deptName.trim()) {
         this.$message.warning('请输入学院名称');
         return;
       }
 
       try {
+        // 发送请求到后端新增学院
         const response = await axios.post('http://localhost:18080/dept/add', {
-          deptName: this.addFormData.deptName
+          deptName: this.formData.deptName // 将学院名称传递给后端
         });
-
+        // 根据后端返回的结果处理逻辑
         if (response.data.code === 10000) {
-          this.$message.success('新增成功');
-          await this.fetchDepts();
+          this.$message.success('新增学院成功');
+          // 清空表单数据
+          this.formData.deptName = '';
+          // 关闭对话框
           this.addDialogVisible = false;
+          // 刷新学院列表
+          await this.fetchDepts();
+        } else {
+          this.$message.error('新增学院失败');
         }
       } catch (error) {
-        this.$message.error('新增失败');
+        console.error(error);
+        this.$message.error('新增学院时发生错误');
       }
     },
-
     // 提交学院编辑
     async submitEdit() {
       const payload = {

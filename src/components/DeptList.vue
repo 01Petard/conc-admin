@@ -124,7 +124,7 @@
     <div class="search-wrapper">
       <el-input
         v-model="search"
-        placeholder="请输入学院名称或ID"
+        placeholder="请输入学院名称"
         clearable
         class="search-input"
         style="width: 300px"
